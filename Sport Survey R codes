@@ -1,0 +1,67 @@
+# Load necessary libraries
+library(readxl)     
+library(dplyr)       
+library(ggplot2)     
+
+# Set file path
+file_path <- "path_to_your_file/sports_survey_questionnaire_-_all_versions_-_labels_-_Cleaning - Copy (3).xlsx"
+
+# Load the data
+data <- read_excel(file_path)
+
+# Explore the dataset
+glimpse(data)       
+summary(data)       
+head(data)           
+
+# Check for missing values
+missing_summary <- sapply(data, function(x) sum(is.na(x)))
+print("Missing Values Summary:")
+print(missing_summary)
+
+# Clean the data
+# Example 1: Drop rows with missing values
+cleaned_data <- data %>%
+  drop_na()
+
+# Example 2: Fill missing values with the median for numeric columns
+cleaned_data <- data %>%
+  mutate(across(where(is.numeric), ~ ifelse(is.na(.), median(., na.rm = TRUE), .)))
+
+# Example 3: Remove duplicates if any
+cleaned_data <- cleaned_data %>%
+  distinct()
+
+# Perform descriptive analysis
+# Summary statistics for numeric columns
+descriptive_stats <- cleaned_data %>%
+  summarise(across(where(is.numeric), list(
+    mean = ~mean(., na.rm = TRUE),
+    median = ~median(., na.rm = TRUE),
+    sd = ~sd(., na.rm = TRUE)
+  )))
+
+print("Descriptive Statistics:")
+print(descriptive_stats)
+
+# Visualization
+# Example 1: Bar plot for categorical data (replace CategoricalColumn with actual column name)
+ggplot(cleaned_data, aes(x = factor(CategoricalColumn))) +
+  geom_bar() +
+  labs(title = "Bar Plot of Categorical Column", x = "Category", y = "Count")
+
+# Example 2: Histogram for a numerical variable (replace NumericalColumn with actual column name)
+ggplot(cleaned_data, aes(x = NumericalColumn)) +
+  geom_histogram(binwidth = 5, fill = "blue", color = "black") +
+  labs(title = "Histogram of Numerical Column", x = "Values", y = "Frequency")
+
+# Example 3: Boxplot comparing numerical values across groups (replace GroupingColumn and NumericalColumn with actual names)
+ggplot(cleaned_data, aes(x = factor(GroupingColumn), y = NumericalColumn)) +
+  geom_boxplot() +
+  labs(title = "Boxplot of Numerical Column by Group", x = "Group", y = "Values")
+
+# Save cleaned data
+write.csv(cleaned_data, "Cleaned_Sports_Survey_Data.csv", row.names = FALSE)
+
+
+
